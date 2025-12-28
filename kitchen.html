@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+    <!-- Theme Loader Script -->
+<script>
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('khusnul_theme');
+        if (savedTheme) {
+            try {
+                const theme = JSON.parse(savedTheme);
+                
+                // Apply CSS variables
+                document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
+                document.documentElement.style.setProperty('--secondary-color', theme.secondaryColor);
+                document.documentElement.style.setProperty('--accent-color', theme.accentColor);
+                document.documentElement.style.setProperty('--heading-font', theme.headingFont);
+                document.documentElement.style.setProperty('--body-font', theme.bodyFont);
+                
+                // Apply background
+                if (theme.backgroundType === 'solid') {
+                    document.body.style.background = theme.backgroundColor;
+                } else if (theme.backgroundType === 'pattern' || theme.backgroundType === 'gradient') {
+                    document.body.style.background = theme.backgroundCSS;
+                }
+                
+                // Apply fonts
+                document.body.style.fontFamily = `'${theme.bodyFont}', sans-serif`;
+                
+                // Apply to headings
+                document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
+                    heading.style.fontFamily = `'${theme.headingFont}', cursive`;
+                });
+                
+            } catch (e) {
+                console.log('Error applying theme');
+            }
+        }
+    });
+</script>
+
+<!-- Tambah di CSS global (style.css) di bagian atas: -->
+<style>
+    :root {
+        --primary-color: #C9A9E8;
+        --secondary-color: #D8BFD8;
+        --accent-color: #FF9A9E;
+        --heading-font: 'Dancing Script', cursive;
+        --body-font: 'Poppins', sans-serif;
+    }
+    
+    /* Update existing styles to use variables */
+    .back-button {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .card-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    /* Add more variable-based styles as needed */
+</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Tools - Project Khusnul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* GRID KHUSUS UNTUK KITCHEN PAGE */
+        .tools-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #666;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #FF9A9E, #FAD0C4);
+            color: white;
+            border-color: #FF9A9E;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* GRID SYSTEM YANG RAPI */
+        .tools-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 kolom untuk HP */
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        /* Untuk tablet */
+        @media (min-width: 600px) {
+            .tools-grid-container {
+                grid-template-columns: repeat(3, 1fr); /* 3 kolom untuk tablet */
+                gap: 20px;
+            }
+        }
+        
+        /* Untuk desktop */
+        @media (min-width: 900px) {
+            .tools-grid-container {
+                grid-template-columns: repeat(4, 1fr); /* 4 kolom untuk desktop */
+                gap: 25px;
+            }
+        }
+        
+        /* Untuk layar besar */
+        @media (min-width: 1200px) {
+            .tools-grid-container {
+                grid-template-columns: repeat(5, 1fr); /* 5 kolom untuk layar besar */
+            }
+        }
+        
+        /* Item card yang lebih rapi */
+        .tool-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 154, 158, 0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(255, 154, 158, 0.2);
+            border-color: #FF9A9E;
+        }
+        
+        .tool-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tool-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        
+        .tool-translation {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        
+        .tool-category {
+            font-size: 0.75rem;
+            color: #888;
+            background: rgba(255, 154, 158, 0.1);
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-top: 5px;
+        }
+        
+        /* Counter dan info */
+        .tools-counter {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(255, 154, 158, 0.1), rgba(250, 208, 196, 0.1));
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .counter-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FF9A9E;
+            margin-bottom: 5px;
+        }
+        
+        .counter-text {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* Search bar */
+        .search-container {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #FF9A9E;
+            box-shadow: 0 0 0 3px rgba(255, 154, 158, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 1.2rem;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px 20px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        /* Quick fix untuk margin berlebihan */
+.page-container { padding: 10px !important; }
+.tools-container { padding: 15px !important; margin-top: 5px !important; }
+.tools-grid-container { gap: 10px !important; margin-bottom: 15px !important; }
+.tool-card { padding: 12px 10px !important; }
+.tools-header, .search-container { margin-bottom: 15px !important; }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <a href="index.html" class="back-button" onclick="return handleBackClick()">
+    <i class="fas fa-arrow-left"></i> Back to Menu
+</a>
+        
+        <div class="page-header">
+            <h1><i class="fas fa-utensils"></i> Kitchen Vocabulary</h1>
+            <p>100+ kitchen tools in English & Indonesian</p>
+        </div>
+        
+        <div class="tools-container">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search tools (knife, pan, etc)...">
+            </div>
+            
+            <!-- Filter Buttons -->
+            <!-- GANTI filter-buttons yang lama dengan ini -->
+<div class="filter-buttons">
+    <button class="filter-btn active" data-category="all">All</button>
+    <button class="filter-btn" data-category="cutting">🔪 Cutting</button>
+    <button class="filter-btn" data-category="cooking">🍳 Cooking</button>
+    <button class="filter-btn" data-category="baking">🎂 Baking</button>
+    <button class="filter-btn" data-category="serving">🥄 Serving</button>
+    <button class="filter-btn" data-category="preparation">🥣 Preparation</button>
+    <button class="filter-btn" data-category="measuring">📏 Measuring</button>
+    <button class="filter-btn" data-category="utensils">🛠️ Utensils</button>
+    <button class="filter-btn" data-category="safety">🧤 Safety</button>
+</div>
+            
+            <!-- Grid Container -->
+            <div class="tools-grid-container" id="toolsGrid">
+                <!-- Tools akan dimuat via JavaScript -->
+            </div>
+            
+            <!-- Counter -->
+            <div class="tools-counter">
+                <div class="counter-number" id="toolCount">0</div>
+                <div class="counter-text" id="counterText">kitchen tools loaded</div>
+            </div>
+            
+            <!-- Tips -->
+            <div class="text-center mt-30">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; border-left: 4px solid #FF9A9E;">
+                    <h3 style="color: #333; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <i class="fas fa-lightbulb" style="color: #FFD166;"></i> Learning Tip
+                    </h3>
+                    <p style="color: #666; line-height: 1.6;">
+                        <strong>Practice daily:</strong> Learn 5 new words each day. 
+                        <br>Tap any card to hear pronunciation!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       // GANTI SEMUA DATA kitchenTools YANG LAMA dengan ini:
+const kitchenTools = [
+    // ===== CUTTING TOOLS (20 items) =====
+    { english: "Chef's Knife", indonesia: "Pisau Koki", emoji: "🔪", category: "cutting" },
+    { english: "Paring Knife", indonesia: "Pisau Kecil", emoji: "🔪", category: "cutting" },
+    { english: "Bread Knife", indonesia: "Pisau Roti", emoji: "🍞", category: "cutting" },
+    { english: "Santoku Knife", indonesia: "Pisau Santoku", emoji: "🔪", category: "cutting" },
+    { english: "Cleaver", indonesia: "Pisau Besar", emoji: "🪓", category: "cutting" },
+    { english: "Utility Knife", indonesia: "Pisau Serbaguna", emoji: "🔪", category: "cutting" },
+    { english: "Tomato Knife", indonesia: "Pisau Tomat", emoji: "🍅", category: "cutting" },
+    { english: "Boning Knife", indonesia: "Pisau Tulang", emoji: "🦴", category: "cutting" },
+    { english: "Fillet Knife", indonesia: "Pisau Fillet", emoji: "🐟", category: "cutting" },
+    { english: "Mezzaluna", indonesia: "Pisau Goyang", emoji: "🌙", category: "cutting" },
+    { english: "Cutting Board", indonesia: "Talenan", emoji: "🪵", category: "cutting" },
+    { english: "Chopping Board", indonesia: "Papan Potong", emoji: "🥕", category: "cutting" },
+    { english: "Kitchen Shears", indonesia: "Gunting Dapur", emoji: "✂️", category: "cutting" },
+    { english: "Herb Scissors", indonesia: "Gunting Herba", emoji: "🌿", category: "cutting" },
+    { english: "Peeler", indonesia: "Pengupas", emoji: "🥔", category: "cutting" },
+    { english: "Vegetable Peeler", indonesia: "Pengupas Sayur", emoji: "🥒", category: "cutting" },
+    { english: "Grater", indonesia: "Parutan", emoji: "🧀", category: "cutting" },
+    { english: "Box Grater", indonesia: "Parutan Kotak", emoji: "📦", category: "cutting" },
+    { english: "Microplane", indonesia: "Parutan Halus", emoji: "✨", category: "cutting" },
+    { english: "Mandoline", indonesia: "Mandolin", emoji: "🥒", category: "cutting" },
+    { english: "Meat Tenderizer", indonesia: "Pelunak Daging", emoji: "🥩", category: "cutting" },
+    { english: "Garlic Crusher", indonesia: "Penghancur Bawang", emoji: "🧄", category: "cutting" },
+    { english: "Zester", indonesia: "Pengeruk Kulit Jeruk", emoji: "🍊", category: "cutting" },
+    { english: "Apple Corer", indonesia: "Pembuat Lubang Apel", emoji: "🍎", category: "cutting" },
+    { english: "Pineapple Corer", indonesia: "Pembuat Lubang Nanas", emoji: "🍍", category: "cutting" },
+    
+    // ===== COOKING TOOLS (20 items) =====
+    { english: "Frying Pan", indonesia: "Wajan", emoji: "🍳", category: "cooking" },
+    { english: "Skillet", indonesia: "Penggorengan", emoji: "🥘", category: "cooking" },
+    { english: "Saucepan", indonesia: "Panci Saus", emoji: "🥘", category: "cooking" },
+    { english: "Stockpot", indonesia: "Panci Besar", emoji: "🍲", category: "cooking" },
+    { english: "Dutch Oven", indonesia: "Panci Dutch", emoji: "🍛", category: "cooking" },
+    { english: "Wok", indonesia: "Wajan Cekung", emoji: "🥘", category: "cooking" },
+    { english: "Steamer", indonesia: "Pengukus", emoji: "♨️", category: "cooking" },
+    { english: "Bamboo Steamer", indonesia: "Pengukus Bambu", emoji: "🎍", category: "cooking" },
+    { english: "Double Boiler", indonesia: "Panci Double", emoji: "⚗️", category: "cooking" },
+    { english: "Bain-Marie", indonesia: "Penangas Air", emoji: "🛁", category: "cooking" },
+    { english: "Griddle", indonesia: "Panggangan Datar", emoji: "🔥", category: "cooking" },
+    { english: "Grill Pan", indonesia: "Wajan Grill", emoji: "🔥", category: "cooking" },
+    { english: "Roasting Pan", indonesia: "Loyang Panggang", emoji: "🍗", category: "cooking" },
+    { english: "Casserole Dish", indonesia: "Panci Casserole", emoji: "🥘", category: "cooking" },
+    { english: "Tagine", indonesia: "Panci Tagine", emoji: "🇲🇦", category: "cooking" },
+    { english: "Pressure Cooker", indonesia: "Panci Presto", emoji: "⏱️", category: "cooking" },
+    { english: "Slow Cooker", indonesia: "Panci Slow Cook", emoji: "🐌", category: "cooking" },
+    { english: "Rice Cooker", indonesia: "Penanak Nasi", emoji: "🍚", category: "cooking" },
+    { english: "Air Fryer", indonesia: "Penggoreng Udara", emoji: "💨", category: "cooking" },
+    { english: "Deep Fryer", indonesia: "Penggoreng Dalam", emoji: "🛢️", category: "cooking" },
+    
+    // ===== BAKING TOOLS (20 items) =====
+    { english: "Baking Sheet", indonesia: "Loyang", emoji: "🍰", category: "baking" },
+    { english: "Baking Tray", indonesia: "Nampan Panggang", emoji: "🥮", category: "baking" },
+    { english: "Muffin Tin", indonesia: "Cetakan Muffin", emoji: "🧁", category: "baking" },
+    { english: "Cupcake Pan", indonesia: "Loyang Cupcake", emoji: "🧁", category: "baking" },
+    { english: "Cake Pan", indonesia: "Loyang Kue", emoji: "🎂", category: "baking" },
+    { english: "Springform Pan", indonesia: "Loyang Berpegas", emoji: "🎂", category: "baking" },
+    { english: "Bundt Pan", indonesia: "Loyang Bundt", emoji: "🍩", category: "baking" },
+    { english: "Loaf Pan", indonesia: "Loyang Roti", emoji: "🍞", category: "baking" },
+    { english: "Pie Dish", indonesia: "Loyang Pie", emoji: "🥧", category: "baking" },
+    { english: "Tart Pan", indonesia: "Loyang Tart", emoji: "🥧", category: "baking" },
+    { english: "Rolling Pin", indonesia: "Rol Adonan", emoji: "🍞", category: "baking" },
+    { english: "Pastry Mat", indonesia: "Matras Pastry", emoji: "🧑‍🍳", category: "baking" },
+    { english: "Pastry Brush", indonesia: "Kuas Kue", emoji: "🖌️", category: "baking" },
+    { english: "Pastry Wheel", indonesia: "Roda Pastry", emoji: "🎡", category: "baking" },
+    { english: "Cookie Cutter", indonesia: "Cetakan Kue", emoji: "🍪", category: "baking" },
+    { english: "Biscuit Cutter", indonesia: "Cetakan Biskuit", emoji: "🍘", category: "baking" },
+    { english: "Dough Scraper", indonesia: "Pengikis Adonan", emoji: "🧤", category: "baking" },
+    { english: "Bench Knife", indonesia: "Pisau Meja", emoji: "🔪", category: "baking" },
+    { english: "Pastry Bag", indonesia: "Kantong Pastry", emoji: "🎒", category: "baking" },
+    { english: "Piping Tip", indonesia: "Moncong Piping", emoji: "💎", category: "baking" },
+    { english: "Sifter", indonesia: "Ayakan", emoji: "🌾", category: "baking" },
+    { english: "Flour Sifter", indonesia: "Ayakan Tepung", emoji: "🌾", category: "baking" },
+    { english: "Dough Whisk", indonesia: "Pengocok Adonan", emoji: "🌀", category: "baking" },
+    
+    // ===== SERVING TOOLS (15 items) =====
+    { english: "Serving Spoon", indonesia: "Sendok Saji", emoji: "🥄", category: "serving" },
+    { english: "Serving Fork", indonesia: "Garpu Saji", emoji: "🍴", category: "serving" },
+    { english: "Salad Spoon", indonesia: "Sendok Salad", emoji: "🥗", category: "serving" },
+    { english: "Slotted Spoon", indonesia: "Sendok Berlubang", emoji: "🥄", category: "serving" },
+    { english: "Perforated Spoon", indonesia: "Sendok Perforasi", emoji: "🥄", category: "serving" },
+    { english: "Ladle", indonesia: "Sendok Sayur", emoji: "🥣", category: "serving" },
+    { english: "Gravy Ladle", indonesia: "Sendok Kuah", emoji: "🥘", category: "serving" },
+    { english: "Soup Ladle", indonesia: "Sendok Sup", emoji: "🍜", category: "serving" },
+    { english: "Tongs", indonesia: "Penjepit", emoji: "🦞", category: "serving" },
+    { english: "Salad Tongs", indonesia: "Penjepit Salad", emoji: "🥗", category: "serving" },
+    { english: "Pasta Fork", indonesia: "Garpu Pasta", emoji: "🍝", category: "serving" },
+    { english: "Pizza Cutter", indonesia: "Pemotong Pizza", emoji: "🍕", category: "serving" },
+    { english: "Pizza Peel", indonesia: "Sekop Pizza", emoji: "🍕", category: "serving" },
+    { english: "Cake Server", indonesia: "Pengambil Kue", emoji: "🎂", category: "serving" },
+    { english: "Pie Server", indonesia: "Pengambil Pie", emoji: "🥧", category: "serving" },
+    { english: "Ice Cream Scoop", indonesia: "Sendok Es Krim", emoji: "🍦", category: "serving" },
+    { english: "Melon Baller", indonesia: "Pembuat Bola Melon", emoji: "🍈", category: "serving" },
+    
+    // ===== PREPARATION TOOLS (15 items) =====
+    { english: "Mixing Bowl", indonesia: "Mangkuk Mixing", emoji: "🥣", category: "preparation" },
+    { english: "Nesting Bowls", indonesia: "Mangkuk Susun", emoji: "🥣", category: "preparation" },
+    { english: "Whisk", indonesia: "Pengocok", emoji: "🥚", category: "preparation" },
+    { english: "Balloon Whisk", indonesia: "Pengocok Balon", emoji: "🎈", category: "preparation" },
+    { english: "French Whisk", indonesia: "Pengocok Prancis", emoji: "🇫🇷", category: "preparation" },
+    { english: "Mortar and Pestle", indonesia: "Lumpang dan Alu", emoji: "🧂", category: "preparation" },
+    { english: "Garlic Press", indonesia: "Penekan Bawang", emoji: "🧄", category: "preparation" },
+    { english: "Citrus Juicer", indonesia: "Pemerah Jeruk", emoji: "🍊", category: "preparation" },
+    { english: "Lemon Squeezer", indonesia: "Pemerah Lemon", emoji: "🍋", category: "preparation" },
+    { english: "Potato Masher", indonesia: "Penghalus Kentang", emoji: "🥔", category: "preparation" },
+    { english: "Ricer", indonesia: "Penghalus Kentang (Ricer)", emoji: "🥔", category: "preparation" },
+    { english: "Egg Separator", indonesia: "Pemisah Telur", emoji: "🥚", category: "preparation" },
+    { english: "Egg Slicer", indonesia: "Pemotong Telur", emoji: "🥚", category: "preparation" },
+    { english: "Avocado Slicer", indonesia: "Pemotong Alpukat", emoji: "🥑", category: "preparation" },
+    { english: "Butter Curler", indonesia: "Pengeriting Mentega", emoji: "🌀", category: "preparation" },
+    { english: "Corkscrew", indonesia: "Pembuka Gabus", emoji: "🍾", category: "preparation" },
+    { english: "Bottle Opener", indonesia: "Pembuka Botol", emoji: "🍺", category: "preparation" },
+    { english: "Can Opener", indonesia: "Pembuka Kaleng", emoji: "🥫", category: "preparation" },
+    
+    // ===== MEASURING TOOLS (10 items) =====
+    { english: "Measuring Cup", indonesia: "Gelas Ukur", emoji: "📏", category: "measuring" },
+    { english: "Measuring Spoon", indonesia: "Sendok Takar", emoji: "🥄", category: "measuring" },
+    { english: "Measuring Jug", indonesia: "Jug Ukur", emoji: "🧪", category: "measuring" },
+    { english: "Digital Scale", indonesia: "Timbangan Digital", emoji: "⚖️", category: "measuring" },
+    { english: "Kitchen Scale", indonesia: "Timbangan Dapur", emoji: "⚖️", category: "measuring" },
+    { english: "Thermometer", indonesia: "Termometer", emoji: "🌡️", category: "measuring" },
+    { english: "Meat Thermometer", indonesia: "Termometer Daging", emoji: "🥩", category: "measuring" },
+    { english: "Candy Thermometer", indonesia: "Termometer Permen", emoji: "🍬", category: "measuring" },
+    { english: "Timer", indonesia: "Penghitung Waktu", emoji: "⏱️", category: "measuring" },
+    { english: "Hourglass", indonesia: "Jam Pasir", emoji: "⌛", category: "measuring" },
+    
+    // ===== UTENSILS & MISC (10 items) =====
+    { english: "Spatula", indonesia: "Spatula", emoji: "🛠️", category: "utensils" },
+    { english: "Turner", indonesia: "Pembalik", emoji: "🔄", category: "utensils" },
+    { english: "Fish Spatula", indonesia: "Spatula Ikan", emoji: "🐟", category: "utensils" },
+    { english: "Slotted Spatula", indonesia: "Spatula Berlubang", emoji: "🕳️", category: "utensils" },
+    { english: "Rubber Spatula", indonesia: "Spatula Karet", emoji: "🧤", category: "utensils" },
+    { english: "Silicone Spatula", indonesia: "Spatula Silikon", emoji: "🤲", category: "utensils" },
+    { english: "Wooden Spoon", indonesia: "Sendok Kayu", emoji: "🪵", category: "utensils" },
+    { english: "Skimmer", indonesia: "Pengambil Buih", emoji: "🌀", category: "utensils" },
+    { english: "Strainer", indonesia: "Saringan", emoji: "🍜", category: "utensils" },
+    { english: "Colander", indonesia: "Saringan Besar", emoji: "🍝", category: "utensils" },
+    { english: "Sieve", indonesia: "Ayakan Halus", emoji: "🌫️", category: "utensils" },
+    { english: "Chinois", indonesia: "Saringan Kerucut", emoji: "🎩", category: "utensils" },
+    
+    // ===== SAFETY & CLEANING (8 items) =====
+    { english: "Oven Mitt", indonesia: "Sarung Oven", emoji: "🧤", category: "safety" },
+    { english: "Pot Holder", indonesia: "Pelindung Panci", emoji: "🛡️", category: "safety" },
+    { english: "Apron", indonesia: "Apron", emoji: "👩‍🍳", category: "safety" },
+    { english: "Cut Resistant Glove", indonesia: "Sarung Tahan Potong", emoji: "✋", category: "safety" },
+    { english: "Splash Guard", indonesia: "Pelindung Cipratan", emoji: "💦", category: "safety" },
+    { english: "Dish Rack", indonesia: "Rak Piring", emoji: "🍽️", category: "cleaning" },
+    { english: "Drying Mat", indonesia: "Matras Pengering", emoji: "🌬️", category: "cleaning" },
+    { english: "Dish Brush", indonesia: "Sikat Piring", emoji: "🪥", category: "cleaning" },
+    { english: "Scrub Brush", indonesia: "Sikat Gosok", emoji: "🧽", category: "cleaning" },
+    { english: "Pot Scrubber", indonesia: "Penggosok Panci", emoji: "🍳", category: "cleaning" }
+];
+
+        // Variabel global
+        let currentCategory = 'all';
+        let currentSearch = '';
+
+        // Render tools ke grid
+        function renderTools() {
+            const toolsGrid = document.getElementById('toolsGrid');
+            
+            // Filter tools berdasarkan kategori dan pencarian
+            let filteredTools = kitchenTools;
+            
+            if (currentCategory !== 'all') {
+                filteredTools = filteredTools.filter(tool => tool.category === currentCategory);
+            }
+            
+            if (currentSearch) {
+                const searchLower = currentSearch.toLowerCase();
+                filteredTools = filteredTools.filter(tool => 
+                    tool.english.toLowerCase().includes(searchLower) ||
+                    tool.indonesia.toLowerCase().includes(searchLower) ||
+                    tool.category.toLowerCase().includes(searchLower)
+                );
+            }
+            
+            // Update counter
+            document.getElementById('toolCount').textContent = filteredTools.length;
+            document.getElementById('counterText').textContent = 
+                filteredTools.length === 1 ? 'kitchen tool found' : 'kitchen tools found';
+            
+            // Kosongkan grid
+            toolsGrid.innerHTML = '';
+            
+            // Jika tidak ada hasil
+            if (filteredTools.length === 0) {
+                toolsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search" style="color: #FF9A9E;"></i>
+                        <h3 style="color: #333; margin-bottom: 10px;">No tools found</h3>
+                        <p style="color: #666;">Try a different search or category</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Tambahkan setiap tool ke grid
+            filteredTools.forEach(tool => {
+                const toolElement = document.createElement('div');
+                toolElement.className = 'tool-card';
+                toolElement.innerHTML = `
+                    <div class="tool-emoji">${tool.emoji}</div>
+                    <div class="tool-name">${tool.english}</div>
+                    <div class="tool-translation">${tool.indonesia}</div>
+                    <div class="tool-category">${tool.category}</div>
+                `;
+                
+                // Klik untuk mendengarkan pengucapan
+                toolElement.addEventListener('click', function() {
+                    speakEnglish(tool.english);
+                    
+                    // Efek visual saat diklik
+                    this.style.transform = 'scale(0.95)';
+                    this.style.boxShadow = '0 5px 15px rgba(255, 154, 158, 0.3)';
+                    
+                    setTimeout(() => {
+                        this.style.transform = '';
+                        this.style.boxShadow = '';
+                    }, 200);
+                });
+                
+                toolsGrid.appendChild(toolElement);
+            });
+        }
+
+        // Fungsi untuk berbicara (text-to-speech)
+        function speakEnglish(text) {
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(text);
+                speech.lang = 'en-US';
+                speech.rate = 0.8;
+                speech.pitch = 1;
+                
+                // Hentikan pembicaraan sebelumnya
+                window.speechSynthesis.cancel();
+                
+                // Mulai berbicara
+                window.speechSynthesis.speak(speech);
+                
+                // Tampilkan notifikasi kecil
+                showSpeakingNotification(text);
+            } else {
+                alert(`Pronunciation: ${text}`);
+            }
+        }
+
+        // Notifikasi saat berbicara
+        function showSpeakingNotification(text) {
+            // Hapus notifikasi sebelumnya
+            const existingNotification = document.querySelector('.speaking-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Buat notifikasi baru
+            const notification = document.createElement('div');
+            notification.className = 'speaking-notification';
+            notification.innerHTML = `
+                <i class="fas fa-volume-up" style="color: #FF9A9E;"></i>
+                <span>Speaking: "<strong>${text}</strong>"</span>
+            `;
+            
+            // Style notifikasi
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: white;
+                padding: 12px 20px;
+                border-radius: 50px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                z-index: 1000;
+                animation: slideUp 0.3s ease;
+                border: 2px solid #FF9A9E;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Hapus setelah 2 detik
+            setTimeout(() => {
+                notification.style.animation = 'slideDown 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // Tambahkan style untuk animasi
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from { transform: translate(-50%, 100%); opacity: 0; }
+                to { transform: translate(-50%, 0); opacity: 1; }
+            }
+            
+            @keyframes slideDown {
+                from { transform: translate(-50%, 0); opacity: 1; }
+                to { transform: translate(-50%, 100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Fungsi filter kategori
+        function setupCategoryFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Hapus active dari semua tombol
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Tambah active ke tombol yang diklik
+                    this.classList.add('active');
+                    
+                    // Update kategori
+                    currentCategory = this.dataset.category;
+                    
+                    // Render ulang tools
+                    renderTools();
+                });
+            });
+        }
+
+        // Fungsi search
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('input', function() {
+                currentSearch = this.value.trim();
+                renderTools();
+            });
+            
+            // Debounce untuk performance
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    currentSearch = this.value.trim();
+                    renderTools();
+                }, 300);
+            });
+        }
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTools();
+            setupCategoryFilters();
+            setupSearch();
+            
+            // Update counter awal
+            document.getElementById('toolCount').textContent = kitchenTools.length;
+            document.getElementById('counterText').textContent = 'kitchen tools total';
+            
+            // Efek masuk untuk cards
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.tool-card');
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 50); // Stagger effect
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

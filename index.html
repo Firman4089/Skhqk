@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+    <!-- Theme Loader Script -->
+<script>
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('khusnul_theme');
+        if (savedTheme) {
+            try {
+                const theme = JSON.parse(savedTheme);
+                
+                // Apply CSS variables
+                document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
+                document.documentElement.style.setProperty('--secondary-color', theme.secondaryColor);
+                document.documentElement.style.setProperty('--accent-color', theme.accentColor);
+                document.documentElement.style.setProperty('--heading-font', theme.headingFont);
+                document.documentElement.style.setProperty('--body-font', theme.bodyFont);
+                
+                // Apply background
+                if (theme.backgroundType === 'solid') {
+                    document.body.style.background = theme.backgroundColor;
+                } else if (theme.backgroundType === 'pattern' || theme.backgroundType === 'gradient') {
+                    document.body.style.background = theme.backgroundCSS;
+                }
+                
+                // Apply fonts
+                document.body.style.fontFamily = `'${theme.bodyFont}', sans-serif`;
+                
+                // Apply to headings
+                document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
+                    heading.style.fontFamily = `'${theme.headingFont}', cursive`;
+                });
+                
+            } catch (e) {
+                console.log('Error applying theme');
+            }
+        }
+    });
+</script>
+
+<!-- Tambah di CSS global (style.css) di bagian atas: -->
+<style>
+    :root {
+        --primary-color: #C9A9E8;
+        --secondary-color: #D8BFD8;
+        --accent-color: #FF9A9E;
+        --heading-font: 'Dancing Script', cursive;
+        --body-font: 'Poppins', sans-serif;
+    }
+    
+    /* Update existing styles to use variables */
+    .back-button {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .card-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    /* Add more variable-based styles as needed */
+</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Khusnul ✨</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        /* TAMBAHKAN INI: Animasi hanya untuk first visit */
+        .no-animation #opening-screen {
+            display: none !important;
+        }
+        
+        .no-animation #dashboard {
+            display: block !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- ANIMASI PEMBUKA (HANYA SEKALI) -->
+    <div id="opening-screen">
+        <div class="welcome-container">
+            <div class="logo-circle">
+                <i class="fas fa-sparkles"></i>
+            </div>
+            <h1 class="typing-text">Hii Khusnul!</h1>
+            <p class="subtitle">sebentar ya...</p>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="hidden">
+        <header class="main-header">
+            <h1><i class="fas fa-star"></i> Project Menu</h1>
+            <p>Pilih fitur yang ingin digunakan</p>
+        </header>
+
+        <div class="menu-container">
+            <!-- Kartu 1: Kitchen Tools -->
+            <a href="kitchen.html" class="menu-card kitchen">
+                <div class="card-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="card-content">
+                    <h3>100 Kitchen Tools</h3>
+                    <p>Learn English vocabulary</p>
+                </div>
+                <div class="card-badge">NEW</div>
+            </a>
+
+            <!-- Kartu 2: To-Do List -->
+            <a href="todo.html" class="menu-card todo">
+                <div class="card-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Smart To-Do List</h3>
+                    <p>Add, edit, delete tasks</p>
+                </div>
+                <div class="card-badge"><span id="todo-count">0</span> tasks</div>
+            </a>
+
+            <!-- Kartu 3: Clock & Timer -->
+            <a href="clock.html" class="menu-card clock">
+                <div class="card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Clock & Timer</h3>
+                    <p>Stopwatch with save feature</p>
+                </div>
+                <div class="card-badge">LIVE</div>
+            </a>
+            
+            <!-- Tambah card ke-4 di index.html -->
+
+
+<!-- Tambah card ke-5 di index.html -->
+<a href="quiz.html" class="menu-card quiz">
+    <div class="card-icon">
+        <i class="fas fa-gamepad"></i>
+    </div>
+    <div class="card-content">
+        <h3>Kitchen Quiz Game</h3>
+        <p>Test your vocabulary knowledge</p>
+    </div>
+    <div class="card-badge">NEW</div>
+</a>
+
+ <!-- Tambah card ke-6 di index.html -->
+<a href="notes.html" class="menu-card notes">
+    <div class="card-icon">
+        <i class="fas fa-sticky-note"></i>
+    </div>
+    <div class="card-content">
+        <h3>My Notes</h3>
+        <p>Write, edit, and save your thoughts</p>
+    </div>
+    <div class="card-badge">NEW</div>
+</a>
+
+<!-- Tambah card ke-7 di index.html -->
+<a href="theme.html" class="menu-card theme">
+    <div class="card-icon">
+        <i class="fas fa-palette"></i>
+    </div>
+    <div class="card-content">
+        <h3>Theme Customizer</h3>
+        <p>Personalize colors, fonts & background</p>
+    </div>
+    <div class="card-badge">NEW</div>
+</a>
+        </div>
+
+        <footer class="main-footer">
+            <p>Made with <i class="fas fa-heart"></i> for Khusnul | 2025 Project</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Cek apakah ini kunjungan pertama atau kembali dari halaman lain
+        document.addEventListener('DOMContentLoaded', function() {
+            const isReturning = sessionStorage.getItem('hasVisited');
+            const todoCountElement = document.getElementById('todo-count');
+            
+            // Update todo count
+            const todos = JSON.parse(localStorage.getItem('khusnul_todos')) || [];
+            if (todoCountElement) {
+                todoCountElement.textContent = todos.length;
+            }
+            
+            if (isReturning) {
+                // Jika sudah pernah buka, langsung tunjukkan dashboard TANPA animasi
+                document.body.classList.add('no-animation');
+                document.getElementById('dashboard').classList.remove('hidden');
+            } else {
+                // Ini kunjungan pertama, tampilkan animasi
+                sessionStorage.setItem('hasVisited', 'true');
+                
+                // Animasi typing
+                setTimeout(() => {
+                    document.querySelector('.typing-text').classList.add('typed');
+                    document.querySelector('.loading-progress').classList.add('loaded');
+                }, 500);
+
+                // Pindah ke dashboard setelah loading
+                setTimeout(() => {
+                    document.getElementById('opening-screen').classList.add('fade-out');
+                    setTimeout(() => {
+                        document.getElementById('opening-screen').classList.add('hidden');
+                        document.getElementById('dashboard').classList.remove('hidden');
+                    }, 800);
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

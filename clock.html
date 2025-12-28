@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="id">
+    <!-- Theme Loader Script -->
+<script>
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('khusnul_theme');
+        if (savedTheme) {
+            try {
+                const theme = JSON.parse(savedTheme);
+                
+                // Apply CSS variables
+                document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
+                document.documentElement.style.setProperty('--secondary-color', theme.secondaryColor);
+                document.documentElement.style.setProperty('--accent-color', theme.accentColor);
+                document.documentElement.style.setProperty('--heading-font', theme.headingFont);
+                document.documentElement.style.setProperty('--body-font', theme.bodyFont);
+                
+                // Apply background
+                if (theme.backgroundType === 'solid') {
+                    document.body.style.background = theme.backgroundColor;
+                } else if (theme.backgroundType === 'pattern' || theme.backgroundType === 'gradient') {
+                    document.body.style.background = theme.backgroundCSS;
+                }
+                
+                // Apply fonts
+                document.body.style.fontFamily = `'${theme.bodyFont}', sans-serif`;
+                
+                // Apply to headings
+                document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
+                    heading.style.fontFamily = `'${theme.headingFont}', cursive`;
+                });
+                
+            } catch (e) {
+                console.log('Error applying theme');
+            }
+        }
+    });
+</script>
+
+<!-- Tambah di CSS global (style.css) di bagian atas: -->
+<style>
+    :root {
+        --primary-color: #C9A9E8;
+        --secondary-color: #D8BFD8;
+        --accent-color: #FF9A9E;
+        --heading-font: 'Dancing Script', cursive;
+        --body-font: 'Poppins', sans-serif;
+    }
+    
+    /* Update existing styles to use variables */
+    .back-button {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .card-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    /* Add more variable-based styles as needed */
+</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock & Countdown - Project Khusnul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== TAB SYSTEM ===== */
+        .tab-container {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #A1C4FD, #C2E9FB);
+            color: white;
+            box-shadow: 0 5px 15px rgba(161, 196, 253, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== COUNTDOWN STYLES ===== */
+        .countdown-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .countdown-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .countdown-header h3 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .countdown-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        /* Event Selection */
+        .event-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .event-option {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .event-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-option.selected {
+            border-color: #A1C4FD;
+            background: linear-gradient(135deg, #f0f7ff, #e3f2fd);
+        }
+        
+        .event-icon {
+            font-size: 2rem;
+            color: #A1C4FD;
+            margin-bottom: 10px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .event-name {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .event-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Custom Date Input */
+        .custom-date-input {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .custom-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .custom-input:focus {
+            outline: none;
+            border-color: #A1C4FD;
+            box-shadow: 0 0 0 3px rgba(161, 196, 253, 0.1);
+        }
+        
+        .set-countdown-btn {
+            background: linear-gradient(135deg, #A1C4FD, #C2E9FB);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .set-countdown-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(161, 196, 253, 0.3);
+        }
+        
+        /* Countdown Display */
+        .countdown-display-container {
+            background: linear-gradient(135deg, #A1C4FD, #C2E9FB);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .countdown-display-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+        
+        .current-event {
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .target-date {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        .countdown-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .countdown-unit {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 15px;
+            border-radius: 15px;
+            min-width: 80px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .countdown-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3A7BD5;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+        
+        .countdown-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Countdown Message */
+        .countdown-message {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .message-text {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        
+        .excitement-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: #e3f2fd;
+            color: #3A7BD5;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Share Button */
+        .share-countdown-btn {
+            background: linear-gradient(135deg, #4cd964, #2ecc71);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px auto 0;
+            transition: all 0.3s;
+        }
+        
+        .share-countdown-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(76, 217, 100, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .event-selection {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .input-row {
+                flex-direction: column;
+            }
+            
+            .custom-input {
+                width: 100%;
+            }
+            
+            .countdown-unit {
+                min-width: 70px;
+                padding: 15px 10px;
+            }
+            
+            .countdown-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .event-selection {
+                grid-template-columns: 1fr;
+            }
+            
+            .countdown-display {
+                gap: 10px;
+            }
+            
+            .countdown-unit {
+                min-width: 65px;
+                padding: 12px 8px;
+            }
+            
+            .countdown-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Menu
+        </a>
+        
+        <div class="page-header">
+            <h1><i class="fas fa-clock"></i> Clock & Countdown</h1>
+            <p>Live clock, stopwatch, and countdown to special dates</p>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('clock')">
+                <i class="fas fa-clock"></i> Clock & Timer
+            </button>
+            <button class="tab-btn" onclick="switchTab('countdown')">
+                <i class="fas fa-heart"></i> Special Countdown
+            </button>
+        </div>
+        
+        <!-- CLOCK & TIMER TAB -->
+        <div id="clock-tab" class="tab-content active">
+            <div class="clock-container">
+                <!-- Live Clock -->
+                <div class="clock-display">
+                    <div class="time-display" id="live-clock">00:00:00</div>
+                    <div class="date-display" id="live-date">Day, Month Date Year</div>
+                </div>
+                
+                <!-- Stopwatch -->
+                <div class="stopwatch-section">
+                    <h3><i class="fas fa-stopwatch"></i> Stopwatch</h3>
+                    <div class="stopwatch-display" id="stopwatch">00:00:00</div>
+                    
+                    <div class="timer-controls">
+                        <button class="timer-btn start-btn" onclick="startStopwatch()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="timer-btn pause-btn" onclick="pauseStopwatch()" disabled>
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="timer-btn reset-btn" onclick="resetStopwatch()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button class="timer-btn save-btn-clock" onclick="saveTime()">
+                            <i class="fas fa-save"></i> Save Time
+                        </button>
+                    </div>
+                    
+                    <!-- Saved Times -->
+                    <div class="saved-times mt-30" id="savedTimesContainer">
+                        <h3><i class="fas fa-history"></i> Saved Times</h3>
+                        <div id="savedTimesList">
+                            <!-- Saved times will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COUNTDOWN TAB -->
+        <div id="countdown-tab" class="tab-content">
+            <div class="countdown-section">
+                <!-- Header -->
+                <div class="countdown-header">
+                    <h3><i class="fas fa-heart"></i> Countdown to Special Moments</h3>
+                    <p>Choose an event or create your own countdown</p>
+                </div>
+                
+                <!-- Event Selection -->
+                <div class="event-selection" id="eventSelection">
+                    <!-- Events will be populated by JavaScript -->
+                </div>
+                
+                <!-- Custom Date Input -->
+                <div class="custom-date-input">
+                    <h4 style="color: #333; margin-bottom: 15px;">
+                        <i class="far fa-calendar-plus"></i> Create Custom Countdown
+                    </h4>
+                    <div class="input-row">
+                        <input type="text" id="eventNameInput" class="custom-input" placeholder="Event name (e.g., My Birthday)">
+                        <input type="date" id="dateInput" class="custom-input" min="2024-01-01">
+                    </div>
+                    <button class="set-countdown-btn" onclick="setCustomCountdown()">
+                        <i class="far fa-calendar-check"></i> Set Countdown
+                    </button>
+                </div>
+                
+                <!-- Countdown Display -->
+                <div class="countdown-display-container">
+                    <div class="current-event" id="currentEvent">New Year 2026</div>
+                    <div class="target-date" id="targetDate">January 1, 2026</div>
+                    
+                    <div class="countdown-display">
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdown-days">00</div>
+                            <div class="countdown-label">Days</div>
+                        </div>
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdown-hours">00</div>
+                            <div class="countdown-label">Hours</div>
+                        </div>
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdown-minutes">00</div>
+                            <div class="countdown-label">Minutes</div>
+                        </div>
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdown-seconds">00</div>
+                            <div class="countdown-label">Seconds</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Countdown Message -->
+                <div class="countdown-message">
+                    <p class="message-text" id="countdownMessage">Getting excited for the new beginning! 🎉</p>
+                    <div class="excitement-badge" id="excitementLevel">Very Excited</div>
+                </div>
+                
+                <!-- Share Button -->
+                <button class="share-countdown-btn" onclick="shareCountdown()">
+                    <i class="fas fa-share-alt"></i> Share Countdown
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // ===== TAB SYSTEM =====
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // If switching to countdown tab, start countdown if not running
+            if (tabName === 'countdown' && !countdownInterval) {
+                startCountdownTimer();
+            }
+        }
+        
+        // ===== COUNTDOWN DATA =====
+        const predefinedEvents = [
+            {
+                id: 'newyear2026',
+                name: 'New Year 2026',
+                date: '2026-01-01',
+                icon: 'fas fa-glass-cheers',
+                description: 'Welcome 2026!'
+            },
+            {
+                id: 'valentine2025',
+                name: 'Valentine\'s Day 2025',
+                date: '2025-02-14',
+                icon: 'fas fa-heart',
+                description: 'Day of love 💖'
+            },
+            {
+                id: 'birthday',
+                name: 'Next Birthday',
+                date: getNextBirthday(),
+                icon: 'fas fa-birthday-cake',
+                description: 'Celebrate!'
+            },
+            {
+                id: 'christmas2025',
+                name: 'Christmas 2025',
+                date: '2025-12-25',
+                icon: 'fas fa-tree',
+                description: 'Season of joy 🎄'
+            },
+            {
+                id: 'project2025',
+                name: 'Project Deadline',
+                date: '2025-12-31',
+                icon: 'fas fa-flag-checkered',
+                description: 'Complete our project!'
+            },
+            {
+                id: 'summer2025',
+                name: 'Summer 2025',
+                date: '2025-06-21',
+                icon: 'fas fa-sun',
+                description: 'Sunny days ☀️'
+            }
+        ];
+        
+        let currentCountdownEvent = predefinedEvents[0];
+        let countdownInterval = null;
+        
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clock functions (existing)
+            updateClock();
+            setInterval(updateClock, 1000);
+            updateStopwatchDisplay();
+            renderSavedTimes();
+            
+            if (localStorage.getItem('stopwatch_running') === 'true') {
+                startStopwatch();
+            }
+            
+            // Countdown functions (new)
+            renderEventOptions();
+            updateCountdownDisplay();
+            startCountdownTimer();
+            loadSavedCountdown();
+        });
+        
+        // ===== EVENT SELECTION =====
+        function renderEventOptions() {
+            const container = document.getElementById('eventSelection');
+            container.innerHTML = '';
+            
+            predefinedEvents.forEach(event => {
+                const eventDate = new Date(event.date);
+                const formattedDate = eventDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const option = document.createElement('div');
+                option.className = `event-option ${event.id === currentCountdownEvent.id ? 'selected' : ''}`;
+                option.dataset.id = event.id;
+                option.innerHTML = `
+                    <div class="event-icon">
+                        <i class="${event.icon}"></i>
+                    </div>
+                    <div class="event-name">${event.name}</div>
+                    <div class="event-date">${formattedDate}</div>
+                `;
+                
+                option.addEventListener('click', () => selectEvent(event.id));
+                container.appendChild(option);
+            });
+        }
+        
+        function selectEvent(eventId) {
+            // Update UI
+            document.querySelectorAll('.event-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.id === eventId) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            // Find event
+            const event = predefinedEvents.find(e => e.id === eventId);
+            if (event) {
+                currentCountdownEvent = event;
+                updateCountdownDisplay();
+                saveCountdownToLocalStorage();
+                showNotification(`Countdown set to ${event.name}!`, 'success');
+            }
+        }
+        
+        function setCustomCountdown() {
+            const eventName = document.getElementById('eventNameInput').value.trim();
+            const dateValue = document.getElementById('dateInput').value;
+            
+            if (!eventName || !dateValue) {
+                showNotification('Please enter both event name and date!', 'error');
+                return;
+            }
+            
+            const selectedDate = new Date(dateValue);
+            const today = new Date();
+            
+            if (selectedDate <= today) {
+                showNotification('Please select a future date!', 'error');
+                return;
+            }
+            
+            // Create custom event
+            currentCountdownEvent = {
+                id: 'custom',
+                name: eventName,
+                date: dateValue,
+                icon: 'far fa-star',
+                description: 'Custom event'
+            };
+            
+            updateCountdownDisplay();
+            saveCountdownToLocalStorage();
+            
+            // Clear inputs
+            document.getElementById('eventNameInput').value = '';
+            document.getElementById('dateInput').value = '';
+            
+            showNotification(`Countdown set for "${eventName}"!`, 'success');
+        }
+        
+        // ===== COUNTDOWN LOGIC =====
+        function startCountdownTimer() {
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(updateCountdownDisplay, 1000);
+        }
+        
+        function updateCountdownDisplay() {
+            const targetDate = new Date(currentCountdownEvent.date);
+            const now = new Date();
+            const difference = targetDate - now;
+            
+            // Update event info
+            const formattedDate = targetDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('currentEvent').textContent = currentCountdownEvent.name;
+            document.getElementById('targetDate').textContent = formattedDate;
+            
+            if (difference <= 0) {
+                // Event has passed
+                document.getElementById('countdown-days').textContent = '00';
+                document.getElementById('countdown-hours').textContent = '00';
+                document.getElementById('countdown-minutes').textContent = '00';
+                document.getElementById('countdown-seconds').textContent = '00';
+                
+                document.getElementById('countdownMessage').textContent = '🎉 The wait is over! The event is here! 🎉';
+                document.getElementById('excitementLevel').textContent = 'Event Time!';
+                return;
+            }
+            
+            // Calculate time units
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            
+            // Update display
+            document.getElementById('countdown-days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('countdown-hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('countdown-minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('countdown-seconds').textContent = seconds.toString().padStart(2, '0');
+            
+            // Update message
+            updateCountdownMessage(days);
+        }
+        
+        function updateCountdownMessage(days) {
+            const messageEl = document.getElementById('countdownMessage');
+            const excitementEl = document.getElementById('excitementLevel');
+            
+            let message = '';
+            let excitement = '';
+            
+            if (days > 365) {
+                message = 'Still quite far away, but something to look forward to! 🌟';
+                excitement = 'Patiently Waiting';
+            } else if (days > 180) {
+                message = 'Getting closer! Time to start planning! 📅';
+                excitement = 'Getting Excited';
+            } else if (days > 90) {
+                message = 'Under 6 months to go! The excitement builds! ✨';
+                excitement = 'Very Excited';
+            } else if (days > 30) {
+                message = 'Less than 3 months away! Almost there! 🎈';
+                excitement = 'Super Excited!';
+            } else if (days > 7) {
+                message = 'Just a few weeks left! Getting ready! 🎉';
+                excitement = 'Extremely Excited!!';
+            } else if (days > 1) {
+                message = 'Only days away! The anticipation is real! 🥳';
+                excitement = 'Over the Moon!!!';
+            } else if (days === 1) {
+                message = 'TOMORROW! The big day is almost here! 🎊';
+                excitement = 'Can\'t Wait!!!';
+            } else {
+                message = 'TODAY IS THE DAY! Enjoy every moment! 🎇';
+                excitement = 'IT\'S HERE!!!';
+            }
+            
+            messageEl.textContent = message;
+            excitementEl.textContent = excitement;
+        }
+        
+        // ===== UTILITY FUNCTIONS =====
+        function getNextBirthday() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let birthday = new Date(currentYear, 5, 15); // June 15
+            
+            if (birthday < now) {
+                birthday.setFullYear(currentYear + 1);
+            }
+            
+            return birthday.toISOString().split('T')[0];
+        }
+        
+        function saveCountdownToLocalStorage() {
+            localStorage.setItem('countdown_event', JSON.stringify(currentCountdownEvent));
+        }
+        
+        function loadSavedCountdown() {
+            const saved = localStorage.getItem('countdown_event');
+            if (saved) {
+                try {
+                    const event = JSON.parse(saved);
+                    currentCountdownEvent = event;
+                    
+                    // Update UI if it's a predefined event
+                    if (event.id !== 'custom') {
+                        selectEvent(event.id);
+                    } else {
+                        updateCountdownDisplay();
+                    }
+                } catch (e) {
+                    console.log('No valid saved countdown');
+                }
+            }
+        }
+        
+        function shareCountdown() {
+            const eventName = currentCountdownEvent.name;
+            const eventDate = new Date(currentCountdownEvent.date);
+            const formattedDate = eventDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const text = `⏳ Countdown to: ${eventName}\n📅 Date: ${formattedDate}\n✨ From Project Khusnul 2025`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: `Countdown to ${eventName}`,
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text + '\n' + window.location.href)
+                    .then(() => showNotification('Countdown copied to clipboard!', 'success'))
+                    .catch(() => showNotification('Failed to copy', 'error'));
+            }
+        }
+        
+        // ===== CLOCK FUNCTIONS (EXISTING) =====
+        function updateClock() {
+            const now = new Date();
+            
+            // Live Clock
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('live-clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            // Live Date
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('live-date').textContent = now.toLocaleDateString('en-US', options);
+            
+            // Update color
+            updateClockColor(hours);
+        }
+        
+        function updateClockColor(hour) {
+            const clockElement = document.getElementById('live-clock');
+            hour = parseInt(hour);
+            
+            if (hour >= 6 && hour < 12) {
+                clockElement.style.color = '#FF9A9E';
+            } else if (hour >= 12 && hour < 18) {
+                clockElement.style.color = '#4cd964';
+            } else if (hour >= 18 && hour < 22) {
+                clockElement.style.color = '#A1C4FD';
+            } else {
+                clockElement.style.color = '#764ba2';
+            }
+        }
+        
+        // Stopwatch variables
+        let stopwatchInterval;
+        let stopwatchTime = parseInt(localStorage.getItem('stopwatch_time')) || 0;
+        let stopwatchRunning = localStorage.getItem('stopwatch_running') === 'true';
+        let savedTimes = JSON.parse(localStorage.getItem('saved_times')) || [];
+        
+        function updateStopwatchDisplay() {
+            document.getElementById('stopwatch').textContent = formatTime(stopwatchTime);
+        }
+        
+        function startStopwatch() {
+            if (!stopwatchRunning) {
+                stopwatchRunning = true;
+                localStorage.setItem('stopwatch_running', 'true');
+                
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime++;
+                    localStorage.setItem('stopwatch_time', stopwatchTime);
+                    updateStopwatchDisplay();
+                }, 1000);
+                
+                document.querySelector('.start-btn').disabled = true;
+                document.querySelector('.pause-btn').disabled = false;
+                
+                showNotification('Stopwatch started!');
+            }
+        }
+        
+        function pauseStopwatch() {
+            if (stopwatchRunning) {
+                stopwatchRunning = false;
+                localStorage.setItem('stopwatch_running', 'false');
+                
+                clearInterval(stopwatchInterval);
+                
+                document.querySelector('.start-btn').disabled = false;
+                document.querySelector('.pause-btn').disabled = true;
+                
+                showNotification('Stopwatch paused');
+            }
+        }
+        
+        function resetStopwatch() {
+            if (!confirm('Reset stopwatch to 00:00:00?')) return;
+            
+            stopwatchRunning = false;
+            localStorage.setItem('stopwatch_running', 'false');
+            
+            clearInterval(stopwatchInterval);
+            stopwatchTime = 0;
+            localStorage.setItem('stopwatch_time', '0');
+            
+            updateStopwatchDisplay();
+            
+            document.querySelector('.start-btn').disabled = false;
+            document.querySelector('.pause-btn').disabled = true;
+            
+            showNotification('Stopwatch reset');
+        }
+        
+        function saveTime() {
+            const timeString = formatTime(stopwatchTime);
+            const timestamp = new Date().toLocaleString();
+            
+            savedTimes.unshift({
+                time: timeString,
+                timestamp: timestamp,
+                id: Date.now()
+            });
+            
+            if (savedTimes.length > 10) {
+                savedTimes = savedTimes.slice(0, 10);
+            }
+            
+            localStorage.setItem('saved_times', JSON.stringify(savedTimes));
+            renderSavedTimes();
+            
+            showNotification(`Time ${timeString} saved!`);
+        }
+        
+        function renderSavedTimes() {
+            const savedTimesList = document.getElementById('savedTimesList');
+            const container = document.getElementById('savedTimesContainer');
+            
+            if (savedTimes.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            savedTimesList.innerHTML = savedTimes.map((item, index) => `
+                <div class="time-item">
+                    <div>
+                        <strong>#${index + 1}: ${item.time}</strong>
+                        <div style="font-size: 0.9rem; color: #888; margin-top: 5px;">
+                            <i class="far fa-clock"></i> ${item.timestamp}
+                        </div>
+                    </div>
+                    <button onclick="deleteSavedTime(${item.id})" style="background: #FF6B6B; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        function deleteSavedTime(id) {
+            if (!confirm('Delete this saved time?')) return;
+            
+            savedTimes = savedTimes.filter(time => time.id !== id);
+            localStorage.setItem('saved_times', JSON.stringify(savedTimes));
+            renderSavedTimes();
+            
+            showNotification('Time deleted');
+        }
+        
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+        
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            clearInterval(countdownInterval);
+            if (stopwatchInterval) clearInterval(stopwatchInterval);
+        });
+    </script>
+</body>
+</html>
